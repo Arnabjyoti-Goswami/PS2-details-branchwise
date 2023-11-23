@@ -88,28 +88,31 @@ def filter_single_branch_df(df, branch):
 
   except:
     print(f"No row in the dataframe 'df' has {branches_col} as {branch}")
-    return
+    return None
   
 
 # Generate and save an excel file that has different sheets for different branches
 def save_excel(df, branches, output_excel_filename='Output.xlsx'):
   output_excel_filepath = os.path.join(nb_dir, output_excel_filename)
 
-  branch_wise_filtered_df_s = []
+  branch_df_s = {}
   for branch in branches:
     filtered_df_for_single_branch = filter_single_branch_df(df, branch)
     if filtered_df_for_single_branch is not None:
-      branch_wise_filtered_df_s.append(filtered_df_for_single_branch)
+      branch_df_s[branch] = filtered_df_for_single_branch
+
+  branches = list(branch_df_s.keys()) 
+  branch_df_s = list(branch_df_s.values())
 
   # Save the initial excel file without any formatting
   writer = pd.ExcelWriter(output_excel_filepath, engine='openpyxl')
-  for i, df in enumerate(branch_wise_filtered_df_s):
+  for i, df in enumerate(branch_df_s):
     df.to_excel(writer, sheet_name = branches[i], index=False)
 
   # Then load the excel file with the data for formatting
   workbook = writer.book
 
-  for i, df_branch in enumerate( branch_wise_filtered_df_s ):
+  for i, df_branch in enumerate(branch_df_s):
     worksheet_name = branches[i]
     worksheet = workbook[worksheet_name]
 
